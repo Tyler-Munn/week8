@@ -1,0 +1,118 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Data-driven continuous color | Sample | ArcGIS Maps SDK for JavaScript 4.28</title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.28/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.28/"></script>
+
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+
+    <script>
+      require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/widgets/Legend"], (
+        Map,
+        MapView,
+        FeatureLayer,
+        Legend
+      ) => {
+        const defaultSym = {
+          type: "simple-fill", // autocasts as new SimpleFillSymbol()
+          outline: {
+            // autocasts as new SimpleLineSymbol()
+            color: [128, 128, 128, 0.2],
+            width: "0.5px"
+          }
+        };
+
+
+        const renderer = {
+          type: "simple", // autocasts as new SimpleRenderer()
+          symbol: defaultSym,
+          label: "Zip Code",
+          visualVariables: [
+            {
+              type: "color",
+              field: "Zhvi",
+              legendOptions: {
+                title: "Zillow Housing Value Estimate (USD)"
+              },
+              stops: [
+                {
+                  value: 25000,
+                  color: "#e6f0ff",
+                  label: "<$25,000"
+                },
+                {
+                  value: 1000000,
+                  color: "#004099",
+                  label: ">$1,000,000"
+                }
+              ]
+            }
+          ]
+        };
+
+        const zillowLayer = new FeatureLayer({
+          url:
+            "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Current_Zillow_Zip_Code_Housing_Estimates/FeatureServer/0",
+          renderer: renderer,
+          title: "Zillow Home Values in the Northeast Corridor",
+          popupTemplate: {
+            // autocasts as new PopupTemplate()
+            title: "{ZIP_CODE}, {PO_NAME}, {STATE}",
+            content: "Zillow Estimates the Average Home Value in {ZIP_CODE} is ${Zhvi}",
+            fieldInfos: [
+              {
+                fieldName: "ZIP_CODE",
+                format: {
+                  digitSeparator: false,
+                  places: 0
+                }
+              },
+              {
+                fieldName: "Zhvi",
+                format: {
+                  digitSeparator: true,
+                  places: 0
+                }
+              }
+            ]
+          }
+        });
+
+        const map = new Map({
+          basemap: "gray-vector",
+          layers: [zillowLayer]
+        });
+
+        const view = new MapView({
+          container: "viewDiv",
+          map: map,
+          center: [-76.306229, 40.044437],
+          zoom: 7
+        });
+
+        view.ui.add(
+          new Legend({
+            view: view
+          }),
+          "bottom-right"
+        );
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv"></div>
+  </body>
+</html>
